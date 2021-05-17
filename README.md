@@ -15,7 +15,7 @@ After analysing the OLTP databse we need to change orientation of our database f
 
 
 ## Extracting the Remote Database
--To extract the database we use a Java Application which follows the MVC(Model-View-Controller) structure. Firstly the controller controls the start and functionallity of the RemoteConnection and the LocalConnection
+-To extract the database we use a Java Application which follows the MVC(Model-View-Controller) structure. Firstly the controller controls the start of the RemoteConnection and the LocalConnection
 
 ```java
     private Connection remoteConnection;
@@ -43,3 +43,83 @@ After analysing the OLTP databse we need to change orientation of our database f
         }
     }
 ```
+- If the remote and local connexion is succesful we start filling the remote data to the local database with the function loadDataBaseInfo(). The name of the table we want to extract is passed as a parameter of this function
+
+```java
+    public void loadDataBaseInfo(String tableName,Model model) throws SQLException {
+        ResultSet rs;
+        Statement stmt;
+
+        System.out.println("Reading remote info");
+
+        stmt = remoteConnection.createStatement();
+        stmt.executeQuery("USE F1");
+
+
+        //buidem la taula de la base local
+        PreparedStatement localSt = localConnection.prepareStatement("delete from " + tableName + ";");
+        localSt.executeUpdate();
+
+
+        //select de les dades de la base remota
+        PreparedStatement remoteSt = remoteConnection.prepareStatement("select * from " + tableName + ";");
+        rs = remoteSt.executeQuery();
+
+        //extraiem la metadata i d'alla el numero de columnes
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int col = rsmd.getColumnCount();
+
+        //Model modelExample;
+        while (rs.next()) {
+            String insert = fabricarString(tableName, col);
+
+            System.out.println("UPDATE: " + localSt);
+
+            localSt = localConnection.prepareStatement(insert);
+
+            for(int i=1;i<=col;i++){
+                //inserim el valor de cada columna respectivament dins del update
+                localSt.setString(i,rs.getString(i));
+            }
+            //executem el update
+            localSt.executeUpdate();
+        }
+        rs.close();
+        stmt.close();
+
+    }
+   
+```
+-We call this function 13 times in the main for all the tables in the remote database
+
+```java
+    
+    Controller mysqlController = new Controller();
+    Model model = new Model();
+
+    System.out.println("Connecting to Database...");
+    if (!mysqlController.startRemoteConnection()) System.exit(1);
+    if (!mysqlController.startLocalConnection()) System.exit(1);
+
+    System.out.println("Getting info...");
+    try {
+        mysqlController.loadDataBaseInfo("circuits",model);
+        mysqlController.loadDataBaseInfo("pitStops",model);
+        mysqlController.loadDataBaseInfo("results",model);
+        mysqlController.loadDataBaseInfo("status",model);
+        mysqlController.loadDataBaseInfo("races",model);
+        mysqlController.loadDataBaseInfo("drivers",model);
+        mysqlController.loadDataBaseInfo("driverStandings",model);
+        mysqlController.loadDataBaseInfo("constructors",model);
+        mysqlController.loadDataBaseInfo("constructorStandings",model);
+        mysqlController.loadDataBaseInfo("constructorResults",model);
+        mysqlController.loadDataBaseInfo("qualifying",model);
+        mysqlController.loadDataBaseInfo("seasons",model);
+        mysqlController.loadDataBaseInfo("lapTimes",model);
+        
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+   
+```
+
