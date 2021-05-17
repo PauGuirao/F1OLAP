@@ -6,7 +6,7 @@ This project consits in adapt an OLTP Formula1 Database to an OLAP format and ma
 This is the remote database that we need to import locally.
 
 ## Relational Model OLAP Database
-<img src="resources/PlayerInfo.png" alt="Example Render" width="500" height="300">
+<img src="OLAP.png" alt="Example Render" width="500" height="500">
 After analysing the OLTP databse we need to change orientation of our database for analtic pourposes and better performance. The way toa achieve that is using and OLAP structure. 
 
 - Circuits, Laps, PitStops and Status tables keep being separate tables as in the OLTP
