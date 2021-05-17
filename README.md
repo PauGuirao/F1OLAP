@@ -123,3 +123,57 @@ After analysing the OLTP databse we need to change orientation of our database f
    
 ```
 
+## Impoting data to local OLAP database
+Once the local OLTP is full with all the data we need to use that data to UPDATE the OLAP database. We will do it with SQL PROCEDURES AND TRIGGERS.
+We use stored procedures inside the triggers to update our data. Every TRIGGER that gets activated when an insert is done, calls its corresponent PROCEDURE. Inside this PROCEDURE there is an INSERT or UPDATE to fill the data. Here is some example:
+
+- CIRCUITS TABLE
+
+```sql
+    -- TRIGGER trigger_circuits TO CALL THE PROCEDURE insert_circuits
+    #&&TRIGGER 0 CIRCUITS->CIRCUITS
+    DELIMITER $
+    DROP TRIGGER IF EXISTS trigger_circuits $
+    CREATE TRIGGER trigger_circuits AFTER INSERT ON f1_oltp.circuits
+    FOR EACH ROW
+    BEGIN
+        CALL insert_circuits(NEW.circuitId,NEW.circuitRef,NEW.name,NEW.location,NEW.country,NEW.lat,NEW.lng,NEW.alt,NEW.url);
+    END $
+    DELIMITER ;
+    
+    
+    DELIMITER //
+    CREATE PROCEDURE insert_circuits(IN cirID INT(11),IN cirRef VARCHAR(255),IN cirName VARCHAR(255),IN loc VARCHAR(255),IN Coun VARCHAR(255), IN lati FLOAT, IN lon FLOAT,IN         alti INT(11),IN cUrl VARCHAR(255))
+    BEGIN
+        INSERT INTO f1_olap.Circuits (circuitId, circuitRef, circuitName, location, country, lat, lng, alt, circuitUrl)
+        VALUES(cirId,cirRef,cirName,loc,Coun,lati,lon,alti,cUrl);
+    END //
+    DELIMITER ; 
+   
+```
+
+- CIRCUITS PITSTOPS
+
+```sql
+    -- TRIGGER trigger_pitstops TO CALL THE PROCEDURE insert_pitstops
+    #&&TRIGGERS PITSTOPS -> PITSTOPS
+    DELIMITER $$
+    DROP TRIGGER IF EXISTS trigger_pitStops $$
+    CREATE TRIGGER trigger_pitStops AFTER INSERT ON f1_oltp.pitstops
+    FOR EACH ROW
+    BEGIN
+        CALL insert_pitstops(NEW.raceId,NEW.driverId,NEW.stop,NEW.lap, NEW.time, NEW.duration, NEW.milliseconds);
+    END $$
+    DELIMITER ;
+
+    
+    DELIMITER //
+    CREATE PROCEDURE insert_pitstops(IN rID INT(11),IN dID INT(11),IN stopIn INT(11),IN lapIn INT(11),IN timeIn TIME, IN durationIn VARCHAR(255), IN milis INT(11))
+    BEGIN
+        INSERT INTO f1_olap.pitstops (raceId, driverId, stop, lap, time, duration, milliseconds)
+        VALUES(rId,dId,stopIn,lapIn,timeIn,durationIn,milis);
+    END //
+    DELIMITER ;; 
+
+```
+   
