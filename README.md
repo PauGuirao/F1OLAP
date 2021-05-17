@@ -15,7 +15,7 @@ After analysing the OLTP databse we need to change orientation of our database f
 
 
 ## Extracting the Remote Database
--To extract the database we use a Java Application which follows the MVC(Model-View-Controller) structure. Firstly the controller controls the start of the RemoteConnection and the LocalConnection
+- To extract the database we use a Java Application which follows the MVC(Model-View-Controller) structure. Firstly the controller controls the start of the RemoteConnection and the LocalConnection
 
 ```java
     private Connection remoteConnection;
@@ -90,7 +90,7 @@ After analysing the OLTP databse we need to change orientation of our database f
     }
    
 ```
--We call this function 13 times in the main for all the tables in the remote database
+- We call this function 13 times in the main for all the tables in the remote database
 
 ```java
     
