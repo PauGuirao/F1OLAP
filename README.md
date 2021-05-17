@@ -1,2 +1,2 @@
 # F1OLAP
-University Project to move the Formula1 OLTP database to an OLAP format
+This project consits in adapt an OLTP Formula1 Database to an OLAP format and make some tests. Firstly we need to acces to a remote database in a remote server. Once the remote OLTP is we need to import it locally with a Java JDB. Next we need to create an OLAP local database and import the OLTP data with stored procedures. Finally we would realize 5 querys to check if everything is properly working
